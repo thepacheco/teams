@@ -25,6 +25,7 @@
   };
 
   var els = {
+    app: document.getElementById("app"),
     sidebarList: document.getElementById("conv-list"),
     globalSearch: document.getElementById("global-search"),
     globalClear: document.getElementById("global-search-clear"),
@@ -38,6 +39,10 @@
       empty: document.getElementById("empty-view"),
     },
 
+    threadBack: document.getElementById("thread-back"),
+    photosBack: document.getElementById("photos-back"),
+    resultsBack: document.getElementById("results-back"),
+
     resultsCount: document.getElementById("results-count"),
     resultsList: document.getElementById("results-list"),
 
@@ -48,7 +53,10 @@
     threadScroll: document.getElementById("thread-scroll"),
     threadMessages: document.getElementById("thread-messages"),
     loadOlder: document.getElementById("load-older"),
+    dateJump: document.getElementById("date-jump"),
     monthJump: document.getElementById("month-jump"),
+    jumpOldest: document.getElementById("jump-oldest"),
+    jumpNewest: document.getElementById("jump-newest"),
 
     photosGrid: document.getElementById("photos-grid"),
     photosEmpty: document.getElementById("photos-empty"),
@@ -199,12 +207,50 @@
 
   // ---------- thread rendering ----------
 
+  function openMobileView() {
+    if (els.app) els.app.classList.add("mobile-view-active");
+  }
+
+  function closeMobileView() {
+    if (els.app) els.app.classList.remove("mobile-view-active");
+  }
+
+  if (els.threadBack) els.threadBack.addEventListener("click", closeMobileView);
+  if (els.photosBack) els.photosBack.addEventListener("click", closeMobileView);
+  if (els.resultsBack) els.resultsBack.addEventListener("click", closeMobileView);
+
+  function toDateInputValue(ts) {
+    var d = new Date(ts);
+    var y = d.getFullYear();
+    var m = String(d.getMonth() + 1).padStart(2, "0");
+    var day = String(d.getDate()).padStart(2, "0");
+    return y + "-" + m + "-" + day;
+  }
+
+  function findClosestIndexByTs(arr, ts) {
+    if (!arr || arr.length === 0) return -1;
+    var low = 0;
+    var high = arr.length - 1;
+    var best = arr.length - 1;
+    while (low <= high) {
+      var mid = Math.floor((low + high) / 2);
+      if (arr[mid].ts >= ts) {
+        best = mid;
+        high = mid - 1;
+      } else {
+        low = mid + 1;
+      }
+    }
+    return best;
+  }
+
   function openConv(slug, opts) {
     opts = opts || {};
     state.currentSlug = slug;
     setActiveConv(slug);
     els.threadSearch.value = "";
     showView("thread");
+    openMobileView();
 
     loadConv(slug).then(function (arr) {
       var meta = state.convMeta.filter(function (c) { return c.slug === slug; })[0];
@@ -217,6 +263,11 @@
 
       populateMonthJump(arr);
 
+      if (arr.length > 0 && els.dateJump) {
+        els.dateJump.min = toDateInputValue(arr[0].ts);
+        els.dateJump.max = toDateInputValue(arr[arr.length - 1].ts);
+      }
+
       var targetId = opts.jumpToId;
       var targetIdx = opts.jumpToIndex;
       if (targetId && targetIdx === undefined) {
@@ -225,8 +276,20 @@
 
       if (targetIdx !== undefined && targetIdx > -1) {
         state.windowStart = Math.max(0, targetIdx - Math.floor(CHUNK / 2));
+        if (els.dateJump && arr[targetIdx]) {
+          els.dateJump.value = toDateInputValue(arr[targetIdx].ts);
+        }
+        if (els.monthJump && arr[targetIdx]) {
+          els.monthJump.value = monthKey(arr[targetIdx].ts);
+        }
       } else {
         state.windowStart = Math.max(0, arr.length - CHUNK);
+        if (els.dateJump && arr.length > 0) {
+          els.dateJump.value = toDateInputValue(arr[arr.length - 1].ts);
+        }
+        if (els.monthJump && arr.length > 0) {
+          els.monthJump.value = monthKey(arr[arr.length - 1].ts);
+        }
       }
 
       renderWindow(arr);
@@ -259,7 +322,7 @@
       if (!seen[k]) { seen[k] = true; keys.push(k); }
     });
     keys.sort();
-    els.monthJump.innerHTML = '<option value="">Jump to month\u2026</option>';
+    els.monthJump.innerHTML = '<option value="">Month\u2026</option>';
     keys.forEach(function (k) {
       var opt = document.createElement("option");
       opt.value = k;
@@ -278,6 +341,42 @@
     els.threadSearch.value = "";
     openConv(state.currentSlug, { jumpToIndex: idx });
   });
+
+  if (els.dateJump) {
+    els.dateJump.addEventListener("change", function () {
+      var val = els.dateJump.value;
+      if (!val) return;
+      var arr = state.cache[state.currentSlug];
+      if (!arr || arr.length === 0) return;
+      var parts = val.split("-");
+      var targetDate = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+      var idx = findClosestIndexByTs(arr, targetDate.getTime());
+      if (idx !== -1) {
+        els.threadSearch.value = "";
+        openConv(state.currentSlug, { jumpToIndex: idx });
+      }
+    });
+  }
+
+  if (els.jumpOldest) {
+    els.jumpOldest.addEventListener("click", function () {
+      if (!state.currentSlug) return;
+      var arr = state.cache[state.currentSlug];
+      if (!arr || arr.length === 0) return;
+      els.threadSearch.value = "";
+      openConv(state.currentSlug, { jumpToIndex: 0 });
+    });
+  }
+
+  if (els.jumpNewest) {
+    els.jumpNewest.addEventListener("click", function () {
+      if (!state.currentSlug) return;
+      var arr = state.cache[state.currentSlug];
+      if (!arr || arr.length === 0) return;
+      els.threadSearch.value = "";
+      openConv(state.currentSlug, { jumpToIndex: arr.length - 1 });
+    });
+  }
 
   function renderWindow(arr) {
     els.threadMessages.innerHTML = "";
@@ -478,6 +577,7 @@
     }
 
     showView("results");
+    openMobileView();
     els.resultsCount.textContent = "Searching\u2026";
     els.resultsList.innerHTML = "";
 
@@ -548,6 +648,7 @@
 
   function openPhotos() {
     showView("photos");
+    openMobileView();
     if (state.photosLoaded) return;
     fetch("https://api.github.com/repos/" + REPO_OWNER + "/" + REPO_NAME + "/contents/" + MEDIA_PATH)
       .then(function (r) {
@@ -657,7 +758,13 @@
       var totalMsgs = meta.reduce(function (a, c) { return a + c.count; }, 0);
       els.exportMeta.textContent = meta.length + " threads \u00b7 " + totalMsgs.toLocaleString() + " messages";
       if (meta.length) {
-        openConv(meta[0].slug);
+        if (window.innerWidth > 760) {
+          openConv(meta[0].slug);
+        } else {
+          loadConv(meta[0].slug);
+          state.currentSlug = meta[0].slug;
+          setActiveConv(meta[0].slug);
+        }
       } else {
         showView("empty");
       }

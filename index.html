@@ -33,6 +33,7 @@
     <main id="main">
       <div id="results-view" class="view">
         <div id="results-head">
+          <button id="results-back" class="mobile-back" aria-label="Back to conversations">&larr; Chats</button>
           <span id="results-count"></span>
         </div>
         <ul id="results-list"></ul>
@@ -41,17 +42,27 @@
       <div id="thread-view" class="view">
         <header id="thread-head">
           <div id="thread-head-top">
+            <button id="thread-back" class="mobile-back" aria-label="Back to conversations">&larr; Chats</button>
             <div class="avatar" id="thread-avatar"></div>
             <div id="thread-titles">
               <div id="thread-title"></div>
               <div id="thread-meta"></div>
             </div>
-            <select id="month-jump">
-              <option value="">Jump to month…</option>
-            </select>
           </div>
-          <div id="thread-search-wrap">
-            <input id="thread-search" type="text" placeholder="Search in this thread…" autocomplete="off">
+          <div id="thread-toolbar">
+            <div id="timeline-controls">
+              <button id="jump-oldest" class="timeline-btn" title="Jump to first message">Oldest</button>
+              <div class="date-input-wrap">
+                <input id="date-jump" type="date" title="Jump to date" aria-label="Jump to specific date">
+              </div>
+              <select id="month-jump" aria-label="Jump to month">
+                <option value="">Month&hellip;</option>
+              </select>
+              <button id="jump-newest" class="timeline-btn" title="Jump to latest message">Latest</button>
+            </div>
+            <div id="thread-search-wrap">
+              <input id="thread-search" type="text" placeholder="Search in this thread…" autocomplete="off">
+            </div>
           </div>
         </header>
         <div id="thread-scroll">
@@ -62,8 +73,11 @@
 
       <div id="photos-view" class="view">
         <header id="photos-head">
-          <div id="photos-title">Photos</div>
-          <div id="photos-meta">Drop image or video files into <code>data/media/</code> in the repo and push — they show up here automatically.</div>
+          <div id="photos-head-top">
+            <button id="photos-back" class="mobile-back" aria-label="Back to conversations">&larr; Chats</button>
+            <div id="photos-title">Photos &amp; Media</div>
+          </div>
+          <div id="photos-meta">All media files from <code>data/media/</code></div>
         </header>
         <div id="photos-grid-wrap">
           <div id="photos-grid"></div>
