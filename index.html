@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Archive</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+    <aside id="sidebar">
+      <div id="sidebar-head">
+        <h1>Archive</h1>
+        <div id="global-search-wrap">
+          <input id="global-search" type="text" placeholder="Search every message…" autocomplete="off">
+          <button id="global-search-clear" title="Clear search">&times;</button>
+        </div>
+      </div>
+
+      <div id="nav-tabs">
+        <button class="nav-tab active" data-tab="chats">Chats</button>
+        <button class="nav-tab" data-tab="photos">Photos</button>
+      </div>
+
+      <div id="conv-list-wrap">
+        <ul id="conv-list"></ul>
+      </div>
+      <div id="sidebar-foot">
+        <span id="export-meta"></span>
+      </div>
+    </aside>
+
+    <main id="main">
+      <div id="results-view" class="view">
+        <div id="results-head">
+          <span id="results-count"></span>
+        </div>
+        <ul id="results-list"></ul>
+      </div>
+
+      <div id="thread-view" class="view">
+        <header id="thread-head">
+          <div id="thread-head-top">
+            <div class="avatar" id="thread-avatar"></div>
+            <div id="thread-titles">
+              <div id="thread-title"></div>
+              <div id="thread-meta"></div>
+            </div>
+            <select id="month-jump">
+              <option value="">Jump to month…</option>
+            </select>
+          </div>
+          <div id="thread-search-wrap">
+            <input id="thread-search" type="text" placeholder="Search in this thread…" autocomplete="off">
+          </div>
+        </header>
+        <div id="thread-scroll">
+          <button id="load-older" type="button">Load earlier messages</button>
+          <div id="thread-messages"></div>
+        </div>
+      </div>
+
+      <div id="photos-view" class="view">
+        <header id="photos-head">
+          <div id="photos-title">Photos</div>
+          <div id="photos-meta">Drop image or video files into <code>data/media/</code> in the repo and push — they show up here automatically.</div>
+        </header>
+        <div id="photos-grid-wrap">
+          <div id="photos-grid"></div>
+          <div id="photos-empty" class="hidden">No files in <code>data/media/</code> yet.</div>
+        </div>
+      </div>
+
+      <div id="empty-view" class="view">
+        <div id="empty-inner">
+          <p>Pick a thread on the left, or search across everything.</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="lightbox">
+    <button id="lightbox-close" aria-label="Close">&times;</button>
+    <button id="lightbox-prev" aria-label="Previous">&#8249;</button>
+    <div id="lightbox-content"></div>
+    <button id="lightbox-next" aria-label="Next">&#8250;</button>
+    <div id="lightbox-caption"></div>
+  </div>
+
+<script src="app.js"></script>
+</body>
+</html>
